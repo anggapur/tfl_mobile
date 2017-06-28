@@ -63,6 +63,7 @@
                 android:textColor="@color/colorPrimaryDark"
                 android:text="Dummy subtitle"
                 android:textSize="10dp" />
+
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

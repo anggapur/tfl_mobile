@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.chrisbanes.photoview.PhotoView;
+import com.squareup.picasso.Picasso;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -24,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class detailImageActivity extends AppCompatActivity {
 
@@ -39,20 +42,25 @@ public class detailImageActivity extends AppCompatActivity {
 
     // File url to download
 
-
+    String poster_path,valueTitle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_image);
         imgv = (PhotoView)findViewById(R.id.imgv);
-        imgv.setImageResource(R.drawable.idul);
+
+
 
         //call intent and get data
         Intent callIntent = getIntent();
         String valueIntent = callIntent.getStringExtra("imgsrc");
-        String poster_path = callIntent.getStringExtra("poster_path");
-        String valueTitle = callIntent.getStringExtra("title");
+        poster_path = callIntent.getStringExtra("poster_path");
+        valueTitle = callIntent.getStringExtra("title");
         String harga = callIntent.getStringExtra("harga");
+        //Toast.makeText(detailImageActivity.this,poster_path,Toast.LENGTH_SHORT).show();
+        Picasso.with(detailImageActivity.this)
+                .load(getString(R.string.api)+"images/"+poster_path)
+                .into(imgv);
         //Toast.makeText(this, valueIntent+" "+valueTitle, Toast.LENGTH_SHORT).show();
         titlev = (TextView)findViewById(R.id.titlev);
         titlev.setText(valueTitle);
@@ -155,9 +163,9 @@ public class detailImageActivity extends AppCompatActivity {
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
 
                 // Output stream
-                Intent callIntent = getIntent();
-                String poster_path = callIntent.getStringExtra("poster_path");
-                OutputStream output = new FileOutputStream("/sdcard/Download/TrashForLife/"+poster_path);
+                String dateNow = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+                String fileName = valueTitle.replaceAll("\\s","_")+"_"+dateNow;
+                OutputStream output = new FileOutputStream("/sdcard/Download/TrashForLife/"+fileName+".jpg");
 
                 byte data[] = new byte[1024];
 
