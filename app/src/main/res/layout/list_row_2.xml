@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/master"
-    android:layout_width="150dp" android:layout_height="wrap_content">
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="0dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="0dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -37,8 +38,8 @@
             android:orientation="vertical"
             android:paddingTop="5dp"
             android:paddingBottom="0dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
 
             <TextView
                 android:id="@+id/txt_title"
@@ -63,7 +64,16 @@
                 android:textColor="@color/colorPrimaryDark"
                 android:text="Dummy subtitle"
                 android:textSize="10dp" />
-
+            <Button
+                android:id="@+id/btn_beli"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:textColor="@color/white"
+                android:layout_marginTop="15dp"
+                android:layout_gravity="center"
+                android:background="@drawable/btn_list"
+                android:textSize="14dp"
+                android:text="Beli"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

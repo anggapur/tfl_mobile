@@ -2,10 +2,13 @@ package com.example.angga.coba2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +38,8 @@ public class detailActivity extends AppCompatActivity {
     String url,data_title,rupiah,data_poster_path;
     TextView textv,titlev,hargav,stockv,terjual,dilihat;
     LinearLayout layout;
+    Button btn_beli;
+    PopupWindow popUpWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +47,7 @@ public class detailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         Intent callIntent = getIntent();
-        String data_id = callIntent.getStringExtra("data_id");
+        final String data_id = callIntent.getStringExtra("data_id");
         data_title = callIntent.getStringExtra("data_title");
         String data_overview = callIntent.getStringExtra("data_overview");
         data_poster_path = callIntent.getStringExtra("data_poster_path");
@@ -77,42 +82,25 @@ public class detailActivity extends AppCompatActivity {
         url = getString(R.string.api)+"list_img.php?id="+data_id;
         layout = (LinearLayout)findViewById(R.id.lineimage);
         callApi();
-        //Toast.makeText(detailActivity.this,url,Toast.LENGTH_SHORT).show();
-        //callApi();
 
 
-//        for(int i=0;i<3;i++)
-//        {
-//
-//
-//            final PhotoView image = new PhotoView(this);
-//            image.setLayoutParams(new android.view.ViewGroup.LayoutParams(400,300));
-//            image.setMaxHeight(400);
-//            image.setMaxWidth(400);
-//            image.setPaddingRelative(0,0,5,0);
-//
-//            //image.setBackgroundResource(R.drawable.border_all);
-//            image.setImageResource(R.drawable.idul);
-//            image.setTag("Ini :"+i);
-//            image.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    /** Initiate Popup view **/
-//                    Intent a = new Intent(detailActivity.this, detailImageActivity.class);
-//                    a.putExtra("imgsrc",image.getTag().toString());
-//                    a.putExtra("title",data_title);
-//                    a.putExtra("harga","Rp"+rupiah);
-//                    a.putExtra("poster_path",data_poster_path);
-//                    startActivity(a);
-//                }
-//            });
-//
-//            // Adds the view to the layout
-//            layout.addView(image);
-//
-//
-//        }
-
+        LinearLayout mainLayout = (LinearLayout)findViewById(R.id.induk);
+        //button beli
+        btn_beli = (Button)findViewById(R.id.btn_beli);
+        btn_beli.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(getWindow().getDecorView().getRootView(),"Berhasil Masuk Keranjang"+data_id, Snackbar.LENGTH_LONG)
+                        .setAction("Keranjang", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+//                                Snackbar.make(getWindow().getDecorView().getRootView(),"Ke Keranjang"+data_id, Snackbar.LENGTH_LONG).show();
+                                Intent a = new Intent(detailActivity.this, keranjangActivity.class);
+                                startActivity(a);
+                            }
+                        }).show();
+            }
+        });
     }
 
     public void callApi(){

@@ -17,9 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -47,9 +45,12 @@ public class MainActivity extends AppCompatActivity
     list_adapter adapter;
     String url,urls;
     ArrayList<HashMap<String,String>> myArray;
-    RequestQueue queue;
+    RequestQueue queue,queueSlider;
     RecyclerView recyclerView;
     SwipeRefreshLayout refreshSwipe;
+    HashMap<String,String> url_maps = new HashMap<String, String>();
+    Button btn_terbaru_list;
+
     //slider
     private SliderLayout mDemoSlider;
     @Override
@@ -91,44 +92,48 @@ public class MainActivity extends AppCompatActivity
         //slider
         mDemoSlider = (SliderLayout)findViewById(R.id.slider);
 
-        final HashMap<String,String> url_maps = new HashMap<String, String>();
+
 //        url_maps.put("Slider1", getString(R.string.api)+"sliders/slider1.jpg");
 //        url_maps.put("Slider2", getString(R.string.api)+"sliders/slider2.jpg");
 //        url_maps.put("Slider3", getString(R.string.api)+"sliders/slider3.jpg");
 //        url_maps.put("Slider4", getString(R.string.api)+"sliders/slider4.jpg");
 
         // Request a string response from the provided URL.
+        urls = getString(R.string.api)+"slider.php";
+        queueSlider = Volley.newRequestQueue(this);
+        callSlider();
 
-        for(String name : url_maps.keySet()){
-            DefaultSliderView textSliderView = new DefaultSliderView(this);
-            // initialize a SliderLayout
-            textSliderView
-                    //.description(name)
-                    .image(url_maps.get(name))
-                    .setScaleType(BaseSliderView.ScaleType.Fit)
-                    .setOnSliderClickListener(this);
-
-            //add your extra information
-//            textSliderView.bundle(new Bundle());
-//            textSliderView.getBundle()
-//                    .putString("extra",name);
-
-            mDemoSlider.addSlider(textSliderView);
-        }
-        mDemoSlider.setPresetTransformer(SliderLayout.Transformer.Accordion);
-        mDemoSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
-        mDemoSlider.setCustomAnimation(new DescriptionAnimation());
-        mDemoSlider.setDuration(4000);
-        mDemoSlider.addOnPageChangeListener(this);
-        ListView l = (ListView)findViewById(R.id.transformers);
-        l.setAdapter(new TransformerAdapter(this));
-        l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //btn click lihat semua
+        btn_terbaru_list = (Button)findViewById(R.id.btn_terbaru_list);
+        btn_terbaru_list.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mDemoSlider.setPresetTransformer(((TextView) view).getText().toString());
-                Toast.makeText(MainActivity.this, ((TextView) view).getText().toString(), Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                goList("Produk Terbaru","terbaru");
             }
         });
+
+
+
+    }
+
+
+    //go list
+    public void goList(String data_title_param, String data_query_param)
+    {
+        Intent i = new Intent(MainActivity.this,listActivity.class);
+        i.putExtra("data_query",data_query_param);
+        i.putExtra("data_title",data_title_param);
+        startActivity(i);
+    }
+    public void goListSearch()
+    {
+        Intent i = new Intent(MainActivity.this,searchActivity.class);
+        startActivity(i);
+    }
+    public void goCart()
+    {
+        Intent i = new Intent(MainActivity.this,keranjangActivity.class);
+        startActivity(i);
     }
 
     //slider
@@ -182,6 +187,60 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPageScrollStateChanged(int state) {}
+    public void callSlider(){
+        // Request a string response from the provided URL.
+        StringRequest sliderRequest = new StringRequest(Request.Method.GET, urls,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try{
+                            JSONObject respon =new JSONObject(response);
+                            JSONArray result= (JSONArray)respon.get("results");
+
+                            for (int i=0;i<result.length();i++){
+                                JSONObject item= (JSONObject)result.get(i);
+
+                                url_maps.put(item.get("caption").toString(),getString(R.string.api)+"sliders/"+item.get("img").toString());
+                                Log.v("Hasil",getString(R.string.api)+"sliders/"+item.get("img").toString());
+
+                            }
+                            for(String name : url_maps.keySet()){
+                                DefaultSliderView textSliderView = new DefaultSliderView(MainActivity.this);
+                                // initialize a SliderLayout
+                                textSliderView
+                                        //.description(name)
+                                        .image(url_maps.get(name))
+                                        .setScaleType(BaseSliderView.ScaleType.Fit);
+                                        //.setOnSliderClickListener(MainActivity.this);
+
+                                //add your extra information
+//            textSliderView.bundle(new Bundle());
+//            textSliderView.getBundle()
+//                    .putString("extra",name);
+
+                                mDemoSlider.addSlider(textSliderView);
+                            }
+                            mDemoSlider.setPresetTransformer(SliderLayout.Transformer.Accordion);
+                            mDemoSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
+                            mDemoSlider.setCustomAnimation(new DescriptionAnimation());
+                            mDemoSlider.setDuration(4000);
+                            mDemoSlider.addOnPageChangeListener(MainActivity.this);
+
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+//                mTextView.setText("That didn't work!");
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+// Add the request to the RequestQueue.
+        queueSlider.add(sliderRequest);
+    }
     //end slider
     public void callApi(){
         // Request a string response from the provided URL.
@@ -264,7 +323,13 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_search) {
+            goListSearch();
+            return true;
+        }
+        else if(id == R.id.action_cart)
+        {
+            goCart();
             return true;
         }
 
@@ -275,7 +340,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        //int id = item.getItemId();
 
 //        if (id == R.id.nav_camera) {
 //            // Handle the camera action
@@ -293,6 +358,10 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        //setting jadi lower dan underscore
+        String st = item.getTitle().toString().replaceAll("\\s","_").toLowerCase();
+        //ke halaman list
+        goList(item.getTitle().toString(),st);
         return true;
     }
 }

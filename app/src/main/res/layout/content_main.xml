@@ -88,7 +88,7 @@
                     android:textColor="@color/black"
                     android:text="BARANG OLAHAN TERBARU"/>
                 <Button
-                    android:id="@+id/terbaru"
+                    android:id="@+id/btn_terbaru_list"
                     android:text="Lihat Semua"
                     android:textColor="@color/colorPrimaryDark"
                     android:textStyle="bold"

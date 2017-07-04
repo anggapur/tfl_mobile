@@ -25,6 +25,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    //slider
+    //compile "com.android.support:support-v4:+"
+    //end slider
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
@@ -32,12 +35,9 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.github.bumptech.glide:glide:4.0.0-RC0'
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
-    testCompile 'junit:junit:4.12'
-    //slider
-    //compile "com.android.support:support-v4:+"
     compile 'com.squareup.picasso:picasso:2.3.2'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.daimajia.slider:library:1.1.5@aar'
-    //end slider
+    testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
 }
