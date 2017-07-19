@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener , list_adapter.ItemClickListener,BaseSliderView.OnSliderClickListener, ViewPagerEx.OnPageChangeListener {
@@ -46,10 +48,10 @@ public class MainActivity extends AppCompatActivity
     String url,urls;
     ArrayList<HashMap<String,String>> myArray;
     RequestQueue queue,queueSlider;
-    RecyclerView recyclerView;
+    RecyclerView recyclerView,recyclerView2;
     SwipeRefreshLayout refreshSwipe;
     HashMap<String,String> url_maps = new HashMap<String, String>();
-    Button btn_terbaru_list;
+    Button btn_terbaru_list,btn_terpopuler_list;
 
     //slider
     private SliderLayout mDemoSlider;
@@ -74,8 +76,10 @@ public class MainActivity extends AppCompatActivity
         //deklatasi recycle view
         recyclerView= (RecyclerView)findViewById(R.id.rvAnimals);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView2= (RecyclerView)findViewById(R.id.rvAnimals2);
+        recyclerView2.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         queue = Volley.newRequestQueue(this);
-        url =getString(R.string.api)+"api.php";
+        url = getString(R.string.api)+"products";
         callApi();
 
         refreshSwipe = (SwipeRefreshLayout)findViewById(R.id.refresh);
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity
 //        url_maps.put("Slider4", getString(R.string.api)+"sliders/slider4.jpg");
 
         // Request a string response from the provided URL.
-        urls = getString(R.string.api)+"slider.php";
+        urls = getString(R.string.api)+"sliders";
         queueSlider = Volley.newRequestQueue(this);
         callSlider();
 
@@ -111,7 +115,14 @@ public class MainActivity extends AppCompatActivity
                 goList("Produk Terbaru","terbaru");
             }
         });
-
+        //btn click lihat semua
+        btn_terpopuler_list = (Button)findViewById(R.id.btn_terpopuler_list);
+        btn_terpopuler_list.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goList("Produk Terpopuler","terbaru");
+            }
+        });
 
 
     }
@@ -196,13 +207,13 @@ public class MainActivity extends AppCompatActivity
 
                         try{
                             JSONObject respon =new JSONObject(response);
-                            JSONArray result= (JSONArray)respon.get("results");
+                            JSONArray result= (JSONArray)respon.get("data");
 
                             for (int i=0;i<result.length();i++){
                                 JSONObject item= (JSONObject)result.get(i);
 
-                                url_maps.put(item.get("caption").toString(),getString(R.string.api)+"sliders/"+item.get("img").toString());
-                                Log.v("Hasil",getString(R.string.api)+"sliders/"+item.get("img").toString());
+                                url_maps.put(item.get("slider_caption").toString(),getString(R.string.api_slider)+item.get("slider_img").toString());
+                                Log.v("Hasil",getString(R.string.api_slider)+item.get("slider_img").toString());
 
                             }
                             for(String name : url_maps.keySet()){
@@ -248,19 +259,20 @@ public class MainActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Toast.makeText(MainActivity.this,response, Toast.LENGTH_LONG).show();
                         try{
                             JSONObject respon =new JSONObject(response);
-                            JSONArray result= (JSONArray)respon.get("results");
+                            JSONArray result= (JSONArray)respon.get("data");
                             myArray = new ArrayList<>();
                             for (int i=0;i<result.length();i++){
                                 JSONObject item= (JSONObject)result.get(i);
                                 HashMap<String,String> temp= new HashMap<>();
-                                temp.put("id",item.get("id").toString());
-                                temp.put("title",item.get("title").toString());
-                                temp.put("overview",item.get("overview").toString());
-                                temp.put("poster_path",item.get("poster_path").toString());
-                                temp.put("harga",item.get("harga").toString());
-                                temp.put("stock",item.get("stock").toString());
+                                temp.put("id",item.get("product_id").toString());
+                                temp.put("title",item.get("product_name").toString());
+                                temp.put("overview",item.get("product_desc").toString());
+                                temp.put("poster_path",item.get("product_featured_image").toString());
+                                temp.put("harga",item.get("product_sell_price").toString());
+                                temp.put("stock",item.get("product_stock").toString());
                                 myArray.add(temp);
                             }
                             setAdapter();
@@ -274,7 +286,17 @@ public class MainActivity extends AppCompatActivity
 //                mTextView.setText("That didn't work!");
                 Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
@@ -283,6 +305,7 @@ public class MainActivity extends AppCompatActivity
         adapter = new list_adapter(MainActivity.this,myArray);
         adapter.setClickListener(MainActivity.this);
         recyclerView.setAdapter(adapter);
+        recyclerView2.setAdapter(adapter);
     }
 
     @Override

@@ -7,8 +7,42 @@
     android:layout_height="match_parent"
     android:background="@color/greyt"
     tools:context="com.example.angga.coba2.keranjangActivity">
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvAnimals"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvAnimals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:id="@+id/kosong"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:src="@drawable/empty_cart"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/keranjang_kosong"
+                android:textColor="@color/black"
+                android:paddingTop="10dp"
+                android:textSize="@dimen/fab_margin"
+                android:textAlignment="center"/>
+            <TextView
+                android:paddingTop="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ayo_belanja"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:textSize="@dimen/subtit"
+                android:textAlignment="center"/>
+        </LinearLayout>
+    </LinearLayout>
 </android.support.v4.widget.SwipeRefreshLayout>

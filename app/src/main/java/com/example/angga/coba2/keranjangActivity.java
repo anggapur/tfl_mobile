@@ -1,12 +1,13 @@
 package com.example.angga.coba2;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -33,17 +34,19 @@ public class keranjangActivity extends AppCompatActivity  implements keranjang_a
     RequestQueue queue;
     RecyclerView recyclerView;
     SwipeRefreshLayout refreshSwipe;
-
+    public static LinearLayout tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_keranjang);
 
+        //textview kosong
+        tv = (LinearLayout) findViewById(R.id.kosong);
         //deklatasi recycle view
         recyclerView= (RecyclerView)findViewById(R.id.rvAnimals);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         queue = Volley.newRequestQueue(this);
-        url ="http://grab-ind.esy.es/api/keranjang.php?id=1";
+        url = getString(R.string.api)+"keranjang.php?id=1";
         callApi();
 
         //set title bar
@@ -55,14 +58,20 @@ public class keranjangActivity extends AppCompatActivity  implements keranjang_a
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        refreshSwipe = (SwipeRefreshLayout)findViewById(R.id.refresh);
+        //swipe to refresh
+        refreshSwipe = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        refreshSwipe.setColorSchemeResources(R.color.orange, R.color.green, R.color.blue);
         refreshSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                callApi();
-                refreshSwipe.setRefreshing(false);
-                Snackbar.make(getWindow().getDecorView().getRootView(), "Selesai", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        callApi();
+                        refreshSwipe.setRefreshing(false);
+                    }
+                }, 3000);
+
             }
         });
 
@@ -74,6 +83,7 @@ public class keranjangActivity extends AppCompatActivity  implements keranjang_a
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        comon.cek_keranjang(response,keranjangActivity.this);
                         try{
                             JSONObject respon =new JSONObject(response);
                             JSONArray result= (JSONArray)respon.get("results");

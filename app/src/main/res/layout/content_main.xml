@@ -105,7 +105,39 @@
                 android:id="@+id/rvAnimals"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:paddingTop="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingBottom="5dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:textStyle="bold"
+                    android:gravity="left"
+                    android:textColor="@color/black"
+                    android:text="BARANG OLAHAN TERPOPULER"/>
+                <Button
+                    android:id="@+id/btn_terpopuler_list"
+                    android:text="Lihat Semua"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textStyle="bold"
+                    android:background="@drawable/border_all"
+                    android:textSize="9dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp" />
+            </RelativeLayout>
+            <android.support.v7.widget.RecyclerView
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:id="@+id/rvAnimals2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </ScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

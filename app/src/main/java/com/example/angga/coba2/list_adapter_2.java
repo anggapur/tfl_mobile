@@ -2,8 +2,6 @@ package com.example.angga.coba2;
 
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +28,7 @@ public class list_adapter_2 extends RecyclerView.Adapter<list_adapter_2.ViewHold
     private ItemClickListener mClickListener;
     private Context context;
     PopupWindow popUpWindow;
+    String server_url;
     public list_adapter_2(Context context, ArrayList<HashMap<String,String>> data) {
         this.mData = data;
         this.inflater = LayoutInflater.from(context);
@@ -76,15 +75,8 @@ public class list_adapter_2 extends RecyclerView.Adapter<list_adapter_2.ViewHold
                     //mData.get(getAdapterPosition()).get("id")mData.get(getAdapterPosition()).get("id")
                     //Toast.makeText(context,,Toast.LENGTH_SHORT).show();
                     String ids = mData.get(getAdapterPosition()).get("id");
-                    Snackbar.make(view,"Berhasil Masuk Keranjang "+ids, Snackbar.LENGTH_LONG)
-                            .setAction("Keranjang", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-
-                                    Intent a = new Intent(context, keranjangActivity.class);
-                                    view.getContext().startActivity(a);
-                                }
-                            }).show();
+                    server_url = context.getString(R.string.api)+"beli.php";
+                    comon.beli(server_url,ids,view,context);
                 }
             });
 
