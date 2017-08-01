@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener , list_adapter.ItemClickListener,BaseSliderView.OnSliderClickListener, ViewPagerEx.OnPageChangeListener {
 
     list_adapter adapter;
-    String url,urls;
-    ArrayList<HashMap<String,String>> myArray;
-    RequestQueue queue,queueSlider;
+    String url,urls,url2;
+    ArrayList<HashMap<String,String>> myArray,myArray2;
+    RequestQueue queue,queueSlider,queue2;
     RecyclerView recyclerView,recyclerView2;
     SwipeRefreshLayout refreshSwipe;
     HashMap<String,String> url_maps = new HashMap<String, String>();
@@ -79,14 +79,18 @@ public class MainActivity extends AppCompatActivity
         recyclerView2= (RecyclerView)findViewById(R.id.rvAnimals2);
         recyclerView2.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         queue = Volley.newRequestQueue(this);
-        url = getString(R.string.api)+"products";
+        url = getString(R.string.api)+"products?data_per_page=5&sort=id&order=DESC";
         callApi();
+        queue2 = Volley.newRequestQueue(this);
+        url2 = getString(R.string.api)+"products?data_per_page=5&sort=seen_count&order=DESC";
+        callApi2();
 
         refreshSwipe = (SwipeRefreshLayout)findViewById(R.id.refresh);
         refreshSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 callApi();
+                callApi2();
                 refreshSwipe.setRefreshing(false);
                 Snackbar.make(getWindow().getDecorView().getRootView(), "Selesai", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
@@ -120,13 +124,61 @@ public class MainActivity extends AppCompatActivity
         btn_terpopuler_list.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goList("Produk Terpopuler","terbaru");
+                goList("Produk Terpopuler","terpopuler");
             }
         });
 
 
+        callApiMenu(getString(R.string.api)+"categories");
+
     }
 
+    public void callApiMenu(String urlz){
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, urlz,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Toast.makeText(MainActivity.this,response, Toast.LENGTH_LONG).show();
+                        try{
+                            JSONObject respon =new JSONObject(response);
+                            JSONArray result= (JSONArray)respon.get("results");
+
+                            //Toast.makeText(MainActivity.this,result.toString(), Toast.LENGTH_LONG).show();
+                            NavigationView navView = (NavigationView) findViewById(R.id.nav_view);
+                            Menu m = navView.getMenu();
+
+                            for (int i=0;i<result.length();i++){
+                                JSONObject item= (JSONObject)result.get(i);
+                                m.add(R.id.myMenu,Menu.NONE,Integer.parseInt(item.get("id").toString()),item.get("name").toString());
+                            }
+
+                            MenuItem mi = m.getItem(m.size()-1);
+                            mi.setTitle(mi.getTitle());
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+//                mTextView.setText("That didn't work!");
+                Toast.makeText(MainActivity.this, "Error Menu", Toast.LENGTH_SHORT).show();
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
 
     //go list
     public void goList(String data_title_param, String data_query_param)
@@ -207,13 +259,13 @@ public class MainActivity extends AppCompatActivity
 
                         try{
                             JSONObject respon =new JSONObject(response);
-                            JSONArray result= (JSONArray)respon.get("data");
+                            JSONArray result= (JSONArray)respon.get("results");
 
                             for (int i=0;i<result.length();i++){
                                 JSONObject item= (JSONObject)result.get(i);
 
                                 url_maps.put(item.get("slider_caption").toString(),getString(R.string.api_slider)+item.get("slider_img").toString());
-                                Log.v("Hasil",getString(R.string.api_slider)+item.get("slider_img").toString());
+                                Log.v("Hasil Slider",getString(R.string.api_slider)+item.get("slider_img").toString());
 
                             }
                             for(String name : url_maps.keySet()){
@@ -248,7 +300,17 @@ public class MainActivity extends AppCompatActivity
 //                mTextView.setText("That didn't work!");
                 Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
 // Add the request to the RequestQueue.
         queueSlider.add(sliderRequest);
     }
@@ -259,23 +321,79 @@ public class MainActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(MainActivity.this,response, Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainActivity.this,response, Toast.LENGTH_LONG).show();
                         try{
                             JSONObject respon =new JSONObject(response);
-                            JSONArray result= (JSONArray)respon.get("data");
+                            JSONObject results= (JSONObject)respon.get("results");
+                            JSONArray result= (JSONArray)results.get("data");
+
+                            //Toast.makeText(MainActivity.this,result.toString(), Toast.LENGTH_LONG).show();
                             myArray = new ArrayList<>();
                             for (int i=0;i<result.length();i++){
                                 JSONObject item= (JSONObject)result.get(i);
                                 HashMap<String,String> temp= new HashMap<>();
-                                temp.put("id",item.get("product_id").toString());
-                                temp.put("title",item.get("product_name").toString());
-                                temp.put("overview",item.get("product_desc").toString());
-                                temp.put("poster_path",item.get("product_featured_image").toString());
-                                temp.put("harga",item.get("product_sell_price").toString());
-                                temp.put("stock",item.get("product_stock").toString());
+                                temp.put("id",item.get("id").toString());
+                                temp.put("title",item.get("name").toString());
+                                temp.put("overview",item.get("desc").toString());
+                                temp.put("poster_path",item.get("featured_image").toString());
+                                temp.put("harga",item.get("price_sell").toString());
+                                temp.put("stock",item.get("stock").toString());
+                                Log.v("Hasil",item.get("name").toString());
                                 myArray.add(temp);
                             }
                             setAdapter();
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+//                mTextView.setText("That didn't work!");
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
+    public void callApi2(){
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url2,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Toast.makeText(MainActivity.this,response, Toast.LENGTH_LONG).show();
+                        try{
+                            JSONObject respon =new JSONObject(response);
+                            JSONObject results= (JSONObject)respon.get("results");
+                            JSONArray result= (JSONArray)results.get("data");
+
+                            //Toast.makeText(MainActivity.this,result.toString(), Toast.LENGTH_LONG).show();
+                            myArray2 = new ArrayList<>();
+                            for (int i=0;i<result.length();i++){
+                                JSONObject item= (JSONObject)result.get(i);
+                                HashMap<String,String> temp= new HashMap<>();
+                                temp.put("id",item.get("id").toString());
+                                temp.put("title",item.get("name").toString());
+                                temp.put("overview",item.get("desc").toString());
+                                temp.put("poster_path",item.get("featured_image").toString());
+                                temp.put("harga",item.get("price_sell").toString());
+                                temp.put("stock",item.get("stock").toString());
+                                Log.v("Hasil",item.get("name").toString());
+                                myArray2.add(temp);
+                            }
+                            setAdapter2();
                         }catch (JSONException e){
                             e.printStackTrace();
                         }
@@ -305,6 +423,23 @@ public class MainActivity extends AppCompatActivity
         adapter = new list_adapter(MainActivity.this,myArray);
         adapter.setClickListener(MainActivity.this);
         recyclerView.setAdapter(adapter);
+    }
+    public  void setAdapter2(){
+        adapter = new list_adapter(MainActivity.this,myArray2);
+        adapter.setClickListener(new list_adapter.ItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                //Toast.makeText(MainActivity.this, "Klik"+myArray2.get(position), Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(MainActivity.this,detailActivity.class);
+                i.putExtra("data_id",myArray2.get(position).get("id"));
+                i.putExtra("data_title",myArray2.get(position).get("title"));
+                i.putExtra("data_overview",myArray2.get(position).get("overview"));
+                i.putExtra("data_poster_path",myArray2.get(position).get("poster_path"));
+                i.putExtra("data_harga",myArray2.get(position).get("harga"));
+                i.putExtra("data_stock",myArray2.get(position).get("stock"));
+                startActivity(i);
+            }
+        });
         recyclerView2.setAdapter(adapter);
     }
 
@@ -382,8 +517,9 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         //setting jadi lower dan underscore
-        String st = item.getTitle().toString().replaceAll("\\s","_").toLowerCase();
+        String st = String.valueOf(item.getOrder());
         //ke halaman list
+        //Toast.makeText(MainActivity.this,st,Toast.LENGTH_LONG).show();
         goList(item.getTitle().toString(),st);
         return true;
     }

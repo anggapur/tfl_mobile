@@ -50,7 +50,7 @@ public class list_adapter_2 extends RecyclerView.Adapter<list_adapter_2.ViewHold
         NumberFormat rupiahFormat = NumberFormat.getInstance(Locale.GERMANY);
         String rupiah = rupiahFormat.format(Double.parseDouble(row.get("harga")));
         holder.subtitleTextView.setText("Rp"+rupiah);
-        Glide.with(this.context).load("http://grab-ind.esy.es/api/images/"+row.get("poster_path")).into(holder.movieImage);
+        Glide.with(this.context).load(context.getString(R.string.api_img)+row.get("poster_path")).into(holder.movieImage);
     }
 
     @Override

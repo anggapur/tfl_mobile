@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,13 +32,14 @@ import org.json.JSONObject;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class detailActivity extends AppCompatActivity {
 
     ImageView imgv;
     boolean zoomOut;
     RequestQueue queue, queueData;
-    String url, data_title, rupiah, data_poster_path, server_url, urls;
+    String url, data_title, rupiah, data_poster_path, server_url, urls,data_desc;
     TextView textv, titlev, hargav, stockv, terjual, dilihat;
     LinearLayout layout;
     Button btn_beli;
@@ -51,7 +54,10 @@ public class detailActivity extends AppCompatActivity {
 
         Intent callIntent = getIntent();
         data_id = callIntent.getStringExtra("data_id");
-
+        data_title = callIntent.getStringExtra("data_title");
+        data_harga = callIntent.getStringExtra("data_harga");
+        data_poster_path  = callIntent.getStringExtra("data_poster_path");
+        data_desc = callIntent.getStringExtra("data_overview");
 
         imgv = (ImageView) findViewById(R.id.imgv);
         textv = (TextView) findViewById(R.id.textv);
@@ -61,6 +67,25 @@ public class detailActivity extends AppCompatActivity {
         terjual = (TextView) findViewById(R.id.terjual);
         dilihat = (TextView) findViewById(R.id.dilihat);
 
+        titlev.setText(data_title);
+        NumberFormat rupiahFormat = NumberFormat.getInstance(Locale.GERMANY);
+        rupiah = rupiahFormat.format(Double.parseDouble(data_harga));
+        hargav.setText("Rp" + rupiah);
+        Glide.with(detailActivity.this).load(getString(R.string.api_img)+data_poster_path).into(imgv);
+        textv.setText(data_overview);
+
+        imgv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent a = new Intent(detailActivity.this, detailImageActivity.class);
+                a.putExtra("imgsrc", data_poster_path);
+
+                a.putExtra("title", data_title);
+                a.putExtra("harga", "Rp" + rupiah);
+                a.putExtra("poster_path",data_poster_path);
+                startActivity(a);
+            }
+        });
         //back button
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -73,7 +98,7 @@ public class detailActivity extends AppCompatActivity {
         layout = (LinearLayout) findViewById(R.id.lineimage);
         //callApi();
         queueData = Volley.newRequestQueue(this);
-        urls = getString(R.string.api) + "api.php?id=" + data_id;
+        urls = getString(R.string.api)+"products/"+ data_id;
         //callApiData();
 
         callApi();
@@ -118,21 +143,23 @@ public class detailActivity extends AppCompatActivity {
                         try {
 
                             JSONObject respon = new JSONObject(response);
-                            JSONArray result = (JSONArray) respon.get("results");
+//                            JSONArray result = (JSONArray) respon.get("results");
 
 
-                            JSONObject item = (JSONObject) result.get(0);
-                            textv.setText(item.get("overview").toString());
-                            titlev.setText(item.get("title").toString());
+                            JSONObject item = (JSONObject) respon.get("results");
+                            //Toast.makeText(detailActivity.this,item.toString(),Toast.LENGTH_LONG).show();
+                            textv.setText(item.get("desc").toString());
+                            titlev.setText(item.get("name").toString());
                             NumberFormat rupiahFormat = NumberFormat.getInstance(Locale.GERMANY);
-                            rupiah = rupiahFormat.format(Double.parseDouble(item.get("harga").toString()));
+                            rupiah = rupiahFormat.format(Double.parseDouble(item.get("price_sell").toString()));
                             hargav.setText("Rp" + rupiah);
                             stockv.setText(item.get("stock").toString());
                             terjual.setText(item.get("stock").toString());
-                            dilihat.setText(item.get("dilihat").toString());
-                            data_title = item.get("title").toString();
+                            dilihat.setText(item.get("seen_count").toString());
+                            data_title = item.get("name").toString();
                             getSupportActionBar().setTitle(data_title);
-                            Glide.with(detailActivity.this).load(getString(R.string.api) + "images/" + item.get("poster_path").toString()).into(imgv);
+                            Glide.with(detailActivity.this).load(getString(R.string.api_img) + item.get("featured_image").toString()).into(imgv);
+                            Log.v("image",getString(R.string.api_img) + item.get("featured_image").toString());
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -144,22 +171,33 @@ public class detailActivity extends AppCompatActivity {
 //                mTextView.setText("That didn't work!");
                 Toast.makeText(detailActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
 // Add the request to the RequestQueue.
         queueData.add(stringRequest);
     }
 
     public void callApi() {
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, urls,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
 
                         try {
                             JSONObject respon = new JSONObject(response);
-                            JSONArray result = (JSONArray) respon.get("results");
-
+                            JSONObject results = (JSONObject) respon.get("results");
+                            JSONArray result = (JSONArray) results.get("image");
+                            //Toast.makeText(detailActivity.this,result.toString(),Toast.LENGTH_LONG).show();
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject item = (JSONObject) result.get(i);
                                 HashMap<String, String> temp = new HashMap<>();
@@ -171,9 +209,9 @@ public class detailActivity extends AppCompatActivity {
 
                                 //image.setBackgroundResource(R.drawable.border_all);
                                 image.setImageResource(R.drawable.idul);
-                                image.setTag(item.get("img").toString());
+                                image.setTag(item.get("image").toString());
                                 Picasso.with(detailActivity.this)
-                                        .load(getString(R.string.api) + "images/" + item.get("img").toString())
+                                        .load(getString(R.string.api_img)+ item.get("image").toString())
                                         .into(image);
 
                                 image.setOnClickListener(new View.OnClickListener() {
@@ -204,9 +242,19 @@ public class detailActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
 //                mTextView.setText("That didn't work!");
-                Toast.makeText(detailActivity.this, "Error", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(detailActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }

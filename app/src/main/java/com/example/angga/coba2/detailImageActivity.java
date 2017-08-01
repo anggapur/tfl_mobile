@@ -59,14 +59,14 @@ public class detailImageActivity extends AppCompatActivity {
         String harga = callIntent.getStringExtra("harga");
         //Toast.makeText(detailImageActivity.this,poster_path,Toast.LENGTH_SHORT).show();
         Picasso.with(detailImageActivity.this)
-                .load(getString(R.string.api)+"images/"+poster_path)
+                .load(getString(R.string.api_img)+poster_path)
                 .into(imgv);
         //Toast.makeText(this, valueIntent+" "+valueTitle, Toast.LENGTH_SHORT).show();
         titlev = (TextView)findViewById(R.id.titlev);
         titlev.setText(valueTitle);
         hargav = (TextView)findViewById(R.id.hargav);
         hargav.setText(harga);
-        final String file_url = getString(R.string.api)+"images/"+poster_path;
+        final String file_url = getString(R.string.api_img)+poster_path;
         //Toast.makeText(detailImageActivity.this,file_url,Toast.LENGTH_SHORT).show();
         //hide it bro
         getSupportActionBar().hide();
@@ -215,7 +215,7 @@ public class detailImageActivity extends AppCompatActivity {
             // Displaying downloaded image into image view
             // Reading image path from sdcard
             String imagePath = Environment.getExternalStorageDirectory().toString() + "/testing.jpg";
-            Snackbar.make(getWindow().getDecorView().getRootView(), "Image Saved", Snackbar.LENGTH_LONG)
+            Snackbar.make(getWindow().getDecorView().getRootView(), "Image Saved in /sdcard/Download/TrashForLife", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             // setting downloaded into image view
 //            my_image.setImageDrawable(Drawable.createFromPath(imagePath));

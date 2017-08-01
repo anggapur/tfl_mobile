@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class searchActivity extends AppCompatActivity implements  list_adapter_2.ItemClickListener{
 
@@ -74,7 +76,7 @@ public class searchActivity extends AppCompatActivity implements  list_adapter_2
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                url = getString(R.string.api) + "data_by_search.php?id="+query;
+                url = getString(R.string.api)+"products/search/"+query;
                 //url = getString(R.string.api) + "api.php";
 
                 callApi(url);
@@ -108,16 +110,18 @@ public class searchActivity extends AppCompatActivity implements  list_adapter_2
 
                         try{
                             JSONObject respon =new JSONObject(response);
-                            JSONArray result= (JSONArray)respon.get("results");
+                            JSONObject results = (JSONObject)respon.get("results");
+                            JSONArray result= (JSONArray)results.get("data");
+                            //Toast.makeText(searchActivity.this,result.toString(),Toast.LENGTH_LONG).show();
                             myArray = new ArrayList<>();
                             for (int i=0;i<result.length();i++){
                                 JSONObject item= (JSONObject)result.get(i);
                                 HashMap<String,String> temp= new HashMap<>();
                                 temp.put("id",item.get("id").toString());
-                                temp.put("title",item.get("title").toString());
-                                temp.put("overview",item.get("overview").toString());
-                                temp.put("poster_path",item.get("poster_path").toString());
-                                temp.put("harga",item.get("harga").toString());
+                                temp.put("title",item.get("name").toString());
+                                temp.put("overview",item.get("desc").toString());
+                                temp.put("poster_path",item.get("featured_image").toString());
+                                temp.put("harga",item.get("price_sell").toString());
                                 temp.put("stock",item.get("stock").toString());
                                 myArray.add(temp);
                             }
@@ -135,7 +139,17 @@ public class searchActivity extends AppCompatActivity implements  list_adapter_2
 //                mTextView.setText("That didn't work!");
                 Toast.makeText(searchActivity.this, "Error", Toast.LENGTH_SHORT).show();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user-key", "1234567890");
+                params.put("Accept", "application/json");
+
+                return params;
+            }
+        };
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
